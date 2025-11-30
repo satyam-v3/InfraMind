@@ -1,11 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Radio, Search, Plus, Signal, Battery, Thermometer } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useSensorsStore } from "@/features/sensors/sensors.store";
 
+// TEMP UI DATA (OK FOR NOW)
 const sensors = [
   { id: 1, name: "Temp Sensor A-101", type: "temperature", location: "Room 101", status: "online", battery: 95, lastUpdate: "2 min ago" },
   { id: 2, name: "Motion Sensor A-101", type: "occupancy", location: "Room 101", status: "online", battery: 87, lastUpdate: "1 min ago" },
@@ -15,27 +23,45 @@ const sensors = [
 ];
 
 export default function Sensors() {
+  // ✅ ALL HOOKS FIRST
+  const { fetchLatest, loading, error } = useSensorsStore();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredSensors = sensors.filter(sensor =>
-    sensor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    sensor.location.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    fetchLatest();
+  }, [fetchLatest]);
+
+  // ✅ SAFE RETURNS AFTER HOOKS
+  if (loading) return <p>Loading sensor data...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+
+  const filteredSensors = sensors.filter(
+    (sensor) =>
+      sensor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      sensor.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "online": return "success";
-      case "warning": return "warning";
-      case "offline": return "destructive";
-      default: return "default";
+      case "online":
+        return "success";
+      case "warning":
+        return "warning";
+      case "offline":
+        return "destructive";
+      default:
+        return "default";
     }
   };
 
   const getSensorIcon = (type) => {
     switch (type) {
-      case "temperature": return Thermometer;
-      case "occupancy": return Radio;
-      default: return Signal;
+      case "temperature":
+        return Thermometer;
+      case "occupancy":
+        return Radio;
+      default:
+        return Signal;
     }
   };
 
@@ -63,7 +89,7 @@ export default function Sensors() {
 
       {/* TOP STATS */}
       <div className="grid gap-4 md:grid-cols-4">
-        
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Sensors</CardTitle>
@@ -140,22 +166,20 @@ export default function Sensors() {
                   {/* LEFT SIDE */}
                   <div className="flex items-center gap-4 flex-1">
                     <div
-                      className={`p-3 rounded-lg ${
-                        sensor.status === "online"
+                      className={`p-3 rounded-lg ${sensor.status === "online"
                           ? "bg-success/10"
                           : sensor.status === "warning"
-                          ? "bg-warning/10"
-                          : "bg-destructive/10"
-                      }`}
+                            ? "bg-warning/10"
+                            : "bg-destructive/10"
+                        }`}
                     >
                       <SensorIcon
-                        className={`h-5 w-5 ${
-                          sensor.status === "online"
+                        className={`h-5 w-5 ${sensor.status === "online"
                             ? "text-success"
                             : sensor.status === "warning"
-                            ? "text-warning"
-                            : "text-destructive"
-                        }`}
+                              ? "text-warning"
+                              : "text-destructive"
+                          }`}
                       />
                     </div>
 
@@ -192,7 +216,7 @@ export default function Sensors() {
                       <Progress value={sensor.battery} className="h-1.5" />
                     </div>
 
-                    <Badge variant={getStatusColor(sensor.status)} className="min-w-[80px] justify-center">
+                    <Badge variant={getStatusColor(sensor.status)} className="min-w-20 justify-center">
                       {sensor.status}
                     </Badge>
 

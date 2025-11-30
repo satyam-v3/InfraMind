@@ -14,25 +14,31 @@ import Sensors from "./pages/Sensors";
 import Settings from "./pages/Settings";
 import Help from "./pages/Help";
 import NotFoundDashboard from "./pages/NotFoundDashboard";
+import ProtectedRoute from "./components/ProtectedRoutes";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
+      <Toaster
+        position="top-right"
+        richColors
+        duration={1000}
+      />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
-          <Route path="/rooms" element={<DashboardLayout><Rooms /></DashboardLayout>} />
-          <Route path="/alerts" element={<DashboardLayout><Alerts /></DashboardLayout>} />
-          <Route path="/analytics" element={<DashboardLayout><Analytics /></DashboardLayout>} />
-          <Route path="/users" element={<DashboardLayout><Users /></DashboardLayout>} />
-          <Route path="/sensors" element={<DashboardLayout><Sensors /></DashboardLayout>} />
-          <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
-          <Route path="/help" element={<DashboardLayout><Help /></DashboardLayout>} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
+            <Route path="/rooms" element={<DashboardLayout><Rooms /></DashboardLayout>} />
+            <Route path="/alerts" element={<DashboardLayout><Alerts /></DashboardLayout>} />
+            <Route path="/analytics" element={<DashboardLayout><Analytics /></DashboardLayout>} />
+            <Route path="/users" element={<DashboardLayout><Users /></DashboardLayout>} />
+            <Route path="/sensors" element={<DashboardLayout><Sensors /></DashboardLayout>} />
+            <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
+            <Route path="/help" element={<DashboardLayout><Help /></DashboardLayout>} />
+          </Route>
           <Route path="*" element={<DashboardLayout><NotFoundDashboard /></DashboardLayout>} />
         </Routes>
       </BrowserRouter>

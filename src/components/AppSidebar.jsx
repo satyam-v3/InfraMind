@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useAuthStore } from "@/features/auth/auth.store";
 
 const navigationItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -46,6 +47,7 @@ const supportItems = [
 ];
 
 export function AppSidebar() {
+  const { logout } = useAuthStore()
   const { state } = useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
@@ -53,7 +55,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
 
   const handleLogout = () => {
-    navigate("/");
+    logout() 
   };
 
   return (
@@ -152,7 +154,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border p-4">
+      <SidebarFooter className="border-t border-border">
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 hover:bg-destructive/10 hover:text-destructive transition-colors"

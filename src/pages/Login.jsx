@@ -1,56 +1,51 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from "react-hook-form";
+import { loginSchema } from "@/features/auth/auth.utils";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: ""
+    }
+  })
+  const { login, loading, error, isAuthenticated } = useAuth();
 
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  async function submitForm(data) {
+    try{
+      await login(data)
+    }catch(e){
+      toast.error(error)
+    }
+  }
 
-    setTimeout(() => {
-      if (email && password) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome to Smart Campus Management System",
-        });
-
-        navigate("/dashboard");
-      } else {
-        toast({
-          title: "Login Failed",
-          description: "Please enter valid credentials",
-          variant: "destructive",
-        });
-      }
-
-      setIsLoading(false);
-    }, 1000);
-  };
-
+  useEffect(() => {
+    if (isAuthenticated) navigate("/dashboard");
+  }, [isAuthenticated, navigate]);
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/5 via-background to-accent/5 p-4">
       <div className="w-full max-w-md space-y-6">
 
         {/* LOGO + TITLE */}
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+          <div className="h-16 w-16 rounded-2xl bg-linear-to-br from-primary to-accent flex items-center justify-center shadow-lg">
             <Building2 className="h-8 w-8 text-primary-foreground" />
           </div>
 
-          <h1 className="text-3xl font-bold">Smart Campus</h1>
-          <p className="text-muted-foreground">Management System</p>
+          <h1 className="text-3xl font-bold">InfraMind</h1>
         </div>
 
         {/* LOGIN CARD */}
@@ -63,7 +58,7 @@ export default function Login() {
           </CardHeader>
 
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(submitForm)} className="space-y-4">
 
               {/* EMAIL */}
               <div className="space-y-2">
@@ -72,11 +67,14 @@ export default function Login() {
                   id="email"
                   type="email"
                   placeholder="admin@campus.edu"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  {...register("email")}
                 />
               </div>
+              {errors.email && (
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
+              )}
 
               {/* PASSWORD */}
               <div className="space-y-2">
@@ -85,19 +83,22 @@ export default function Login() {
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  {...register("password")}
                 />
               </div>
+              {errors.password && (
+                <p className="text-sm text-destructive">
+                  {errors.password.message}
+                </p>
+              )}
 
               {/* SUBMIT BUTTON */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
-                disabled={isLoading}
+                className="w-full bg-linear-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+                disabled={isSubmitting}
               >
-                {isLoading ? "Signing in..." : "Sign In"}
+                {loading ? "Signing in..." : "Sign In"}
               </Button>
 
             </form>
